@@ -1,17 +1,22 @@
-import pyperclip as pc
-import sys
-from pathlib import Path
-from subprocess import Popen, PIPE
+# create requirements.txt:
 
-github_token_file: Path = Path(r'/home/patryk/python/h.txt')
+# create coder:
 
-with open(github_token_file, 'rb') as file:
-    token: bytes = file.readline()
+# create encoder:
 
-if sys.platform == 'linux':
-    p = Popen(args=['xsel', '-bi'], stdin=PIPE)
-    p.communicate(input=token)
-else:
-    pc.copy(token)
+# create database:
 
-print('token successfully copied to clipboard')
+# save new password:
+# request for input (tkinter)
+# code the password
+# connect to database
+# save new record in database
+
+# get password from database:
+# connect to database
+# load table
+# load last value
+# encode the password
+# show results (password by '*')
+
+
