@@ -1,6 +1,16 @@
+
+from modules import hash
 # create requirements.txt:
 
 # create coder:
+psw = 'rutek'
+code = hash.coder(psw)
+decode = hash.decoder(code)
+
+# TODO: problem ze ścieżką do pliku .ods
+
+print(code)
+print(decode)
 
 # create encoder:
 
