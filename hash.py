@@ -6,11 +6,10 @@ from pathlib import Path
 from pandas_ods_reader import read_ods
 
 
-class GetPassword:
+class Hash:
     """
     Copy password to clipboard from database after inputting url or name of webside
     """
-
     dict_filepath: Path = Path('./dict') / 'dict.ods'
     df_raw: pd.DataFrame = read_ods(dict_filepath, columns=[1, 2, 3, 4])
 
