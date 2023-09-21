@@ -1,93 +1,149 @@
+from datetime import datetime
 from tkinter import *
 from typing import Generator
-
-root = Tk()
 
 
 def next_value(values: Generator) -> int:
     return int(next(values))
 
 
-def show_gui(type: str,
-             title: str = None,
-             ) -> None:
+class GUI:
     """
-    Shows GUI
-    :param type: 'add' or 'a' to ADD new record, 'edit' or 'e' to EDIT existing record
-    :param title: title of gui window
-    :return: None
+    Represents GUI
     """
+    def __init__(self) -> None:
+        self.root = Tk()
+        self.root.title('Password')
+        self.label_col: int = 0
+        self.entry_col: int = 1
+        self.entry_width: int = 50
+        self.rows: Generator[int, None, None] = (_ for _ in list(range(0, 15)))
+        self.width: int = 2  # number of columns
 
-    root.title(title)
-    type = type.lower()
-    label_col: int = 0
-    entry_col: int = 1
-    entry_width: int = 50
-    rows: Generator[int, None, None] = (_ for _ in list(range(0, 15)))
-    width: int = 2  # number of columns
-    main_label_txt: str = ''
-    notif_label_txt: str = ''
-    url_label_txt: str = 'Address URL: '
-    name_label_txt: str = 'Name: '
-    log_label_txt: str = 'Login: '
-    psw_label_txt: str = 'Password: '
-    psw2_label_txt: str = 'Repeat password: '
-    sec_label_txt: str = 'Security Level: '
-    id_label_txt: str = 'ID number: '
-    cre_label_txt: str = 'Creation date: '
-    mod_label_txt: str = 'Last modification date: '
-    try:
-        assert type == 'add' or type == 'a' or type == 'edit' or type == 'e'
-    except AssertionError as error:
-        print(error)
-        root.destroy()
-        return
-    else:
-        if type == 'add' or type == 'a':
-            main_label_txt: str = 'Fill the gaps to add a new record.'
-        elif type == 'edit' or type == 'e':
-            main_label_txt: str = 'Edit information about a record.'
-            # TODO: fill input brackets with info from database
+        self.main_label_txt: str = ''
+        self.url_label_txt: str = 'Address URL: '
+        self.name_label_txt: str = 'Name: '
+        self.log_label_txt: str = 'Login: '
+        self.psw_label_txt: str = 'Password: '
+        self.psw2_label_txt: str = 'Repeat password: '
+        self.sec_label_txt: str = 'Security Level: '
+        self.id_label_txt: str = 'ID number: '
+        self.cre_label_txt: str = 'Creation date: '
+        self.mod_label_txt: str = 'Last modification date: '
 
-    # labels
-    main_label: Label = Label(root, text=main_label_txt)
-    notif_label: Label = Label(root, text=notif_label_txt)
-    url_label: Label = Label(root, text=url_label_txt)
-    name_label: Label = Label(root, text=name_label_txt)
-    log_label: Label = Label(root, text=log_label_txt)
-    psw_label: Label = Label(root, text=psw_label_txt)
-    psw2_label: Label = Label(root, text=psw2_label_txt)
-    sec_label: Label = Label(root, text=sec_label_txt)
-    id_label: Label = Label(root, text=id_label_txt)
-    cre_label: Label = Label(root, text=cre_label_txt)
-    mod_label: Label = Label(root, text=mod_label_txt)
+        self.notif_label_txt: StringVar = StringVar()
+        self.sec_val: StringVar = StringVar()
+        self.id_val: StringVar = StringVar()
+        self.cre_val: StringVar = StringVar()
 
-    # entries
-    name_entry: Entry = Entry(root, width=entry_width)
+        # labels
+        self.main_label: Label = Label(self.root, text=self.main_label_txt)
+        self.url_label: Label = Label(self.root, text=self.url_label_txt)
+        self.name_label: Label = Label(self.root, text=self.name_label_txt)
+        self.log_label: Label = Label(self.root, text=self.log_label_txt)
+        self.psw_label: Label = Label(self.root, text=self.psw_label_txt)
+        self.psw2_label: Label = Label(self.root, text=self.psw2_label_txt)
+        self.sec_label: Label = Label(self.root, text=self.sec_label_txt)
+        self.id_label: Label = Label(self.root, text=self.id_label_txt)
+        self.cre_label: Label = Label(self.root, text=self.cre_label_txt)
+        self.mod_label: Label = Label(self.root, text=self.mod_label_txt)
 
-    # grids
-    main_label.grid(row=next_value(rows), columnspan=width, sticky=W+E)
-    notif_label.grid(row=next_value(rows), columnspan=width, sticky=W+E)
-    url_label.grid(row=next_value(rows), column=label_col, sticky=W)
-    name_label.grid(row=next_value(rows), column=label_col, sticky=W)
-    log_label.grid(row=next_value(rows), column=label_col, sticky=W)
-    psw_label.grid(row=next_value(rows), column=label_col, sticky=W)
-    psw2_label.grid(row=next_value(rows), column=label_col, sticky=W)
-    sec_label.grid(row=next_value(rows), column=label_col, sticky=W)
-    id_label.grid(row=next_value(rows), column=label_col, sticky=W)
-    cre_label.grid(row=next_value(rows), column=label_col, sticky=W)
-    mod_label.grid(row=next_value(rows), column=label_col, sticky=W)
+        self.notif_label: Label = Label(self.root, textvariable=self.notif_label_txt)
+        self.sec_val_label: Label = Label(self.root, textvariable=self.sec_val)
+        self.id_val_label: Label = Label(self.root, textvariable=self.id_val)
+        self.cre_val_label: Label = Label(self.root, textvariable=self.cre_val)
 
-    name_entry.grid(row=name_label.grid_info()['row'], column=entry_col, padx=10, sticky=E)
+        # entries
+        self.url_entry: Entry = Entry(self.root, width=self.entry_width)
+        self.name_entry: Entry = Entry(self.root, width=self.entry_width)
+        self.log_entry: Entry = Entry(self.root, width=self.entry_width)
+        self.psw_entry: Entry = Entry(self.root, show='*', width=self.entry_width)
+        self.psw2_entry: Entry = Entry(self.root, show='*', width=self.entry_width)
 
+        # buttons
+        self.save_button: Button = Button(self.root, text='SAVE', command=self.save)
+        self.back_button: Button = Button(self.root, text='BACK', command=self.back)
+        self.clear_button: Button = Button(self.root, text='CLEAR', command=self.clear)
+        
+    def save(self) -> None:
+        """
+        Saves information from frame to MySQL table.
+        :return: None
+        """
+        # check password matching
+        if self.psw_entry.get() != self.psw2_entry.get():
+            self.notif_label_txt.set("Password doesn't match! Try again")
+            self.psw_entry.configure(fg='red')
+            self.psw2_entry.configure(fg='red')
+            return
+        else:
+            self.notif_label_txt.set("Saving record to database.")
+            self.psw_entry.configure(fg='green')
+            self.psw2_entry.configure(fg='green')
+            # TODO: pop-up with success info
 
-    # buttons
+        # connect to database
+        # check if record exists
+        pass
 
-    print(name_label.grid_info())
-    print(name_entry.grid_info())
-    print(main_label.grid_info())
+    def back(self) -> None:
+        """
+        Undoes the last change in frame.
+        :return: None
+        """
+        pass
 
+    def clear(self) -> None:
+        """
+        Clears out all the changes in frame.
+        :return: None
+        """
+        self.url_entry.delete(0, END)
+        self.name_entry.delete(0, END)
+        self.log_entry.delete(0, END)
+        self.psw_entry.delete(0, END)
+        self.psw2_entry.delete(0, END)
 
-show_gui(type='a', title='Title')
+    def add_record(self) -> None:
+        """
+        Shows frame for adding a new record.
+        :return: None
+        """
+        self.main_label_txt: str = 'Fill the gaps to add a new record.'
 
-root.mainloop()
+        # labels grids
+        self.main_label.grid(row=next_value(self.rows), columnspan=self.width, sticky=W + E)
+        self.notif_label.grid(row=next_value(self.rows), columnspan=self.width, sticky=W + E)
+        self.url_label.grid(row=next_value(self.rows), column=self.label_col, sticky=W)
+        self.name_label.grid(row=next_value(self.rows), column=self.label_col, sticky=W)
+        self.log_label.grid(row=next_value(self.rows), column=self.label_col, sticky=W)
+        self.psw_label.grid(row=next_value(self.rows), column=self.label_col, sticky=W)
+        self.psw2_label.grid(row=next_value(self.rows), column=self.label_col, sticky=W)
+        self.sec_label.grid(row=next_value(self.rows), column=self.label_col, sticky=W)
+        self.id_label.grid(row=next_value(self.rows), column=self.label_col, sticky=W)
+        self.cre_label.grid(row=next_value(self.rows), column=self.label_col, sticky=W)
+        # mod_label.grid(row=next_value(self.rows), column=self.label_col, sticky=W)
+        self.sec_val_label.grid(row=self.sec_label.grid_info()['row'], column=self.entry_col, padx=10, sticky=W)
+        self.id_val_label.grid(row=self.id_label.grid_info()['row'], column=self.entry_col, padx=10, sticky=W)
+        self.cre_val_label.grid(row=self.cre_label.grid_info()['row'], column=self.entry_col, padx=10, sticky=W)
+
+        # entries grids
+        self.url_entry.grid(row=self.url_label.grid_info()['row'], column=self.entry_col, padx=10, sticky=E)
+        self.name_entry.grid(row=self.name_label.grid_info()['row'], column=self.entry_col, padx=10, sticky=E)
+        self.log_entry.grid(row=self.log_label.grid_info()['row'], column=self.entry_col, padx=10, sticky=E)
+        self.psw_entry.grid(row=self.psw_label.grid_info()['row'], column=self.entry_col, padx=10, sticky=E)
+        self.psw2_entry.grid(row=self.psw2_label.grid_info()['row'], column=self.entry_col, padx=10, sticky=E)
+
+        # buttons grids
+        self.back_button.grid(row=next_value(self.rows), column=self.label_col, sticky=W + E)
+        self.clear_button.grid(row=self.back_button.grid_info()['row'], column=self.entry_col, sticky=W + E)
+        self.save_button.grid(row=next_value(self.rows), columnspan=self.width, sticky=W + E)
+
+        self.root.mainloop()
+
+    def edit_record(self) -> None:
+        """
+        Shows frame for editing an existing record.
+        :return: None
+        """
+        pass
