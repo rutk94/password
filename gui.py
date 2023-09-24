@@ -1,16 +1,49 @@
+import requests
+import pandas as pd
+from typing import Any, Generator
 from datetime import datetime
 from tkinter import *
-from typing import Generator
+
+from functions import get_df_from_database
+from utils import mysqlconn, passprompt
 
 
 def next_value(values: Generator) -> int:
+    """Generates next value"""
     return int(next(values))
 
 
+def check_url(url: str) -> bool:
+    """Checks if url exists"""
+    prefix = 'https://'
+    if prefix not in url:
+        url: str = prefix + url
+
+    try:
+        response = requests.get(url)
+    except requests.exceptions.ConnectionError:
+        return False
+    else:
+        if response.status_code == 200:
+            return True
+        else:
+            return False
+
+
+def check_if_exists(
+        url: str,
+        name: str,
+        log: str,
+        psw: str,
+) -> bool:
+    """Checks if record already exists in database"""
+    df = get_df_from_database()
+    # TODO: check in database
+    return False
+
+
 class GUI:
-    """
-    Represents GUI
-    """
+    """Represents GUI"""
     def __init__(self) -> None:
         self.root = Tk()
         self.root.title('Password')
@@ -70,21 +103,74 @@ class GUI:
         Saves information from frame to MySQL table.
         :return: None
         """
-        # check password matching
-        if self.psw_entry.get() != self.psw2_entry.get():
-            self.notif_label_txt.set("Password doesn't match! Try again")
-            self.psw_entry.configure(fg='red')
-            self.psw2_entry.configure(fg='red')
-            return
-        else:
-            self.notif_label_txt.set("Saving record to database.")
-            self.psw_entry.configure(fg='green')
-            self.psw2_entry.configure(fg='green')
-            # TODO: pop-up with success info
+        url_check: bool = False
+        name_check: bool = False
+        log_check: bool = False
+        psw_check: bool = False
+        exist_check: bool = False
 
-        # connect to database
+        bad_value: dict[str, Any] = dict(highlightthickness=2, highlightbackground='red')
+        good_value: dict[str, Any] = dict(highlightthickness=0, highlightbackground='black')
+
+        # check url
+        if self.url_entry.get():
+            if check_url(self.url_entry.get()):
+                url_check = True
+            else:
+                self.url_entry.configure(bad_value)
+        else:
+            self.url_entry.configure(bad_value)
+
+        # check name
+        if self.name_entry.get():
+            name_check = True
+        else:
+            self.name_entry.configure(bad_value)
+
+        # check login
+        if self.log_entry.get():
+            log_check = True
+        else:
+            self.log_entry.configure(bad_value)
+
+        # check password matching
+        if self.psw_entry.get() and self.psw2_entry.get():
+            if self.psw_entry.get() != self.psw2_entry.get():
+                # self.notif_label_txt.set("Password doesn't match! Try again")
+                self.psw_entry.configure(bad_value)
+                self.psw2_entry.configure(bad_value)
+            else:
+                self.psw_entry.configure(good_value)
+                self.psw2_entry.configure(good_value)
+                psw_check = True
+        else:
+            self.psw_entry.configure(bad_value)
+            self.psw2_entry.configure(bad_value)
+
+        # connect ot database
+        # username, password = passprompt.PassPrompt(hashed=False).get_from_file(main.pass_path)
+        # conn: mysqlconn = mysqlconn.MySQLConn(username, password, main.database, main.hostname)
+
         # check if record exists
-        pass
+        exist_check = check_if_exists(
+            url=self.url_entry.get(),
+            name=self.name_entry.get(),
+            log=self.log_entry.get(),
+            psw=self.psw_entry.get(),
+        )
+
+        if (
+                url_check
+                and name_check
+                and log_check
+                and psw_check
+                and exist_check
+        ):
+            self.notif_label_txt.set("Saving record to database.")
+            # TODO: connect to database
+            # TODO: input data to database
+            # TODO: pop-up with success info
+            return
 
     def back(self) -> None:
         """
@@ -98,11 +184,17 @@ class GUI:
         Clears out all the changes in frame.
         :return: None
         """
+        clear_config: dict[str, Any] = dict(fg='black', highlightthickness=0)
+
         self.url_entry.delete(0, END)
         self.name_entry.delete(0, END)
         self.log_entry.delete(0, END)
         self.psw_entry.delete(0, END)
         self.psw2_entry.delete(0, END)
+
+        self.url_entry.configure(clear_config)
+        self.psw_entry.configure(clear_config)
+        self.psw2_entry.configure(clear_config)
 
     def add_record(self) -> None:
         """
