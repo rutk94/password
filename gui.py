@@ -4,42 +4,45 @@ from typing import Any, Generator
 from datetime import datetime
 from tkinter import *
 
-from functions import get_df_from_database
+from func import (check_notna,
+                  check_url,
+                  check_match,
+                  check_exist)
 from utils import mysqlconn, passprompt
 
 
-def next_value(values: Generator) -> int:
-    """Generates next value"""
-    return int(next(values))
+# def next_value(values: Generator) -> int:
+#     """Generates next value"""
+#     return int(next(values))
 
 
-def check_url(url: str) -> bool:
-    """Checks if url exists"""
-    prefix = 'https://'
-    if prefix not in url:
-        url: str = prefix + url
+# def check_url(url: str) -> bool:
+#     """Checks if url exists"""
+#     prefix = 'https://'
+#     if prefix not in url:
+#         url: str = prefix + url
+#
+#     try:
+#         response = requests.get(url)
+#     except requests.exceptions.ConnectionError:
+#         return False
+#     else:
+#         if response.status_code == 200:
+#             return True
+#         else:
+#             return False
 
-    try:
-        response = requests.get(url)
-    except requests.exceptions.ConnectionError:
-        return False
-    else:
-        if response.status_code == 200:
-            return True
-        else:
-            return False
 
-
-def check_if_exists(
-        url: str,
-        name: str,
-        log: str,
-        psw: str,
-) -> bool:
-    """Checks if record already exists in database"""
-    df = get_df_from_database()
-    # TODO: check in database
-    return False
+# def check_if_exists(
+#         url: str,
+#         name: str,
+#         log: str,
+#         psw: str,
+# ) -> bool:
+#     """Checks if record already exists in database"""
+#     df = get_df_from_database()
+#     # TODO: check in database
+#     return False
 
 
 class GUI:
@@ -103,6 +106,7 @@ class GUI:
         Saves information from frame to MySQL table.
         :return: None
         """
+        # TODO: zaktualizować save do nowych func
         url_check: bool = False
         name_check: bool = False
         log_check: bool = False
