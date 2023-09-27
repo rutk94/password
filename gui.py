@@ -1,9 +1,12 @@
 import requests
 import pandas as pd
+import numpy as np
 from typing import Any, Generator
 from datetime import datetime
 from tkinter import *
 
+import func
+from hash import Hash
 from func import (check_notna,
                   check_url,
                   check_match,
@@ -11,7 +14,7 @@ from func import (check_notna,
 from utils import mysqlconn, passprompt
 
 
-# def next_value(values: Generator) -> int:
+# def next(values: Generator) -> int:
 #     """Generates next value"""
 #     return int(next(values))
 
@@ -101,80 +104,121 @@ class GUI:
         self.back_button: Button = Button(self.root, text='BACK', command=self.back)
         self.clear_button: Button = Button(self.root, text='CLEAR', command=self.clear)
         
+    def create_new_row(self) -> pd.DataFrame:
+        """Creates new row for database table."""
+        data: np.array = np.array([
+            [
+                'ID',   # next ID
+                self.name_entry.get(),
+                self.url_entry.get(),
+                self.log_entry.get(),
+                Hash().code(self.psw_entry.get()),
+                1,  # security level
+                pd.Timestamp(2023, 1, 1, 0, 0, 0),  # create dttm
+                pd.Timestamp(2023, 1, 1, 0, 0, 0),  # modif dttm
+                ''  # prev password
+            ]
+        ])
+        df: pd.DataFrame = pd.DataFrame(data)
+        return df
+
     def save(self) -> None:
         """
         Saves information from frame to MySQL table.
         :return: None
         """
         # TODO: zaktualizować save do nowych func
-        url_check: bool = False
-        name_check: bool = False
-        log_check: bool = False
-        psw_check: bool = False
-        exist_check: bool = False
+        # check if entries are not null
+        check_notna: bool = (func.check_notna(self.url_entry.get())
+                             and func.check_notna(self.name_entry.get())
+                             and func.check_notna(self.log_entry.get())
+                             and func.check_notna(self.psw_entry.get())
+                             and func.check_notna(self.psw2_entry.get())
+                             )
+        
+        check_url_exist: bool = False
+        check_psw_match: bool = False
+        if check_notna:
+            # check if url exists
+            check_url_exist = func.check_url_exist(self.url_entry.get())
+            # check if passwords are matching
+            check_psw_match = func.check_match([self.psw_entry.get(), self.psw2_entry.get()])
 
-        bad_value: dict[str, Any] = dict(highlightthickness=2, highlightbackground='red')
-        good_value: dict[str, Any] = dict(highlightthickness=0, highlightbackground='black')
-
-        # check url
-        if self.url_entry.get():
-            if check_url(self.url_entry.get()):
-                url_check = True
-            else:
-                self.url_entry.configure(bad_value)
-        else:
-            self.url_entry.configure(bad_value)
-
-        # check name
-        if self.name_entry.get():
-            name_check = True
-        else:
-            self.name_entry.configure(bad_value)
-
-        # check login
-        if self.log_entry.get():
-            log_check = True
-        else:
-            self.log_entry.configure(bad_value)
-
-        # check password matching
-        if self.psw_entry.get() and self.psw2_entry.get():
-            if self.psw_entry.get() != self.psw2_entry.get():
-                # self.notif_label_txt.set("Password doesn't match! Try again")
-                self.psw_entry.configure(bad_value)
-                self.psw2_entry.configure(bad_value)
-            else:
-                self.psw_entry.configure(good_value)
-                self.psw2_entry.configure(good_value)
-                psw_check = True
-        else:
-            self.psw_entry.configure(bad_value)
-            self.psw2_entry.configure(bad_value)
-
-        # connect ot database
-        # username, password = passprompt.PassPrompt(hashed=False).get_from_file(main.pass_path)
-        # conn: mysqlconn = mysqlconn.MySQLConn(username, password, main.database, main.hostname)
-
-        # check if record exists
-        exist_check = check_if_exists(
-            url=self.url_entry.get(),
-            name=self.name_entry.get(),
-            log=self.log_entry.get(),
-            psw=self.psw_entry.get(),
-        )
-
-        if (
-                url_check
-                and name_check
-                and log_check
-                and psw_check
-                and exist_check
-        ):
-            self.notif_label_txt.set("Saving record to database.")
-            # TODO: connect to database
-            # TODO: input data to database
-            # TODO: pop-up with success info
-            return
+        # check if record exists in database
+        if check_notna and check_url_exist and check_psw_match:
+            df: pd.DataFrame = self.create_new_row()
+            pass
+            
+        
+        
+        # url_check: bool = False
+        # name_check: bool = False
+        # log_check: bool = False
+        # psw_check: bool = False
+        # exist_check: bool = False
+        # 
+        # bad_value: dict[str, Any] = dict(highlightthickness=2, highlightbackground='red')
+        # good_value: dict[str, Any] = dict(highlightthickness=0, highlightbackground='black')
+        # 
+        # # check url
+        # if self.url_entry.get():
+        #     if check_url(self.url_entry.get()):
+        #         url_check = True
+        #     else:
+        #         self.url_entry.configure(bad_value)
+        # else:
+        #     self.url_entry.configure(bad_value)
+        # 
+        # # check name
+        # if self.name_entry.get():
+        #     name_check = True
+        # else:
+        #     self.name_entry.configure(bad_value)
+        # 
+        # # check login
+        # if self.log_entry.get():
+        #     log_check = True
+        # else:
+        #     self.log_entry.configure(bad_value)
+        # 
+        # # check password matching
+        # if self.psw_entry.get() and self.psw2_entry.get():
+        #     if self.psw_entry.get() != self.psw2_entry.get():
+        #         # self.notif_label_txt.set("Password doesn't match! Try again")
+        #         self.psw_entry.configure(bad_value)
+        #         self.psw2_entry.configure(bad_value)
+        #     else:
+        #         self.psw_entry.configure(good_value)
+        #         self.psw2_entry.configure(good_value)
+        #         psw_check = True
+        # else:
+        #     self.psw_entry.configure(bad_value)
+        #     self.psw2_entry.configure(bad_value)
+        # 
+        # # connect ot database
+        # # username, password = passprompt.PassPrompt(hashed=False).get_from_file(main.pass_path)
+        # # conn: mysqlconn = mysqlconn.MySQLConn(username, password, main.database, main.hostname)
+        # 
+        # # check if record exists
+        # exist_check = check_if_exists(
+        #     url=self.url_entry.get(),
+        #     name=self.name_entry.get(),
+        #     log=self.log_entry.get(),
+        #     psw=self.psw_entry.get(),
+        # )
+        # 
+        # if (
+        #         url_check
+        #         and name_check
+        #         and log_check
+        #         and psw_check
+        #         and exist_check
+        # ):
+        #     self.notif_label_txt.set("Saving record to database.")
+        #     # TODO: connect to database
+        #     # TODO: input data to database
+        #     # TODO: pop-up with success info
+        #     return
 
     def back(self) -> None:
         """
@@ -208,17 +252,17 @@ class GUI:
         self.main_label_txt: str = 'Fill the gaps to add a new record.'
 
         # labels grids
-        self.main_label.grid(row=next_value(self.rows), columnspan=self.width, sticky=W + E)
-        self.notif_label.grid(row=next_value(self.rows), columnspan=self.width, sticky=W + E)
-        self.url_label.grid(row=next_value(self.rows), column=self.label_col, sticky=W)
-        self.name_label.grid(row=next_value(self.rows), column=self.label_col, sticky=W)
-        self.log_label.grid(row=next_value(self.rows), column=self.label_col, sticky=W)
-        self.psw_label.grid(row=next_value(self.rows), column=self.label_col, sticky=W)
-        self.psw2_label.grid(row=next_value(self.rows), column=self.label_col, sticky=W)
-        self.sec_label.grid(row=next_value(self.rows), column=self.label_col, sticky=W)
-        self.id_label.grid(row=next_value(self.rows), column=self.label_col, sticky=W)
-        self.cre_label.grid(row=next_value(self.rows), column=self.label_col, sticky=W)
-        # mod_label.grid(row=next_value(self.rows), column=self.label_col, sticky=W)
+        self.main_label.grid(row=next(self.rows), columnspan=self.width, sticky=W + E)
+        self.notif_label.grid(row=next(self.rows), columnspan=self.width, sticky=W + E)
+        self.url_label.grid(row=next(self.rows), column=self.label_col, sticky=W)
+        self.name_label.grid(row=next(self.rows), column=self.label_col, sticky=W)
+        self.log_label.grid(row=next(self.rows), column=self.label_col, sticky=W)
+        self.psw_label.grid(row=next(self.rows), column=self.label_col, sticky=W)
+        self.psw2_label.grid(row=next(self.rows), column=self.label_col, sticky=W)
+        self.sec_label.grid(row=next(self.rows), column=self.label_col, sticky=W)
+        self.id_label.grid(row=next(self.rows), column=self.label_col, sticky=W)
+        self.cre_label.grid(row=next(self.rows), column=self.label_col, sticky=W)
+        # mod_label.grid(row=next(self.rows), column=self.label_col, sticky=W)
         self.sec_val_label.grid(row=self.sec_label.grid_info()['row'], column=self.entry_col, padx=10, sticky=W)
         self.id_val_label.grid(row=self.id_label.grid_info()['row'], column=self.entry_col, padx=10, sticky=W)
         self.cre_val_label.grid(row=self.cre_label.grid_info()['row'], column=self.entry_col, padx=10, sticky=W)
@@ -231,9 +275,9 @@ class GUI:
         self.psw2_entry.grid(row=self.psw2_label.grid_info()['row'], column=self.entry_col, padx=10, sticky=E)
 
         # buttons grids
-        self.back_button.grid(row=next_value(self.rows), column=self.label_col, sticky=W + E)
+        self.back_button.grid(row=next(self.rows), column=self.label_col, sticky=W + E)
         self.clear_button.grid(row=self.back_button.grid_info()['row'], column=self.entry_col, sticky=W + E)
-        self.save_button.grid(row=next_value(self.rows), columnspan=self.width, sticky=W + E)
+        self.save_button.grid(row=next(self.rows), columnspan=self.width, sticky=W + E)
 
         self.root.mainloop()
 

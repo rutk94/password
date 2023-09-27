@@ -35,7 +35,7 @@ def check_notna(value: Any) -> bool:
         return False
 
 
-def check_url(url: str) -> bool:
+def check_url_exist(url: str) -> bool:
     """Checks if url exists"""
     prefix = 'https://'
     if prefix not in url:
